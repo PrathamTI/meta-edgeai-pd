@@ -17,7 +17,7 @@ SRC_URI = "https://files.pythonhosted.org/packages/69/59/b6fc2188dfc7ea4f936cd12
            https://files.pythonhosted.org/packages/33/90/623f99c55c7d0727a58eb2b7dfb65cb406c561a5c2e9a95b0d6a450c473d/wurlitzer-3.1.1.tar.gz;name=wurlitzer;subdir=${S}/deps\
            https://files.pythonhosted.org/packages/8a/a1/8d812e53a5da1687abb10445275d41a8b13adb781bbf7196ddbcf8d88505/lazy_loader-0.5-py3-none-any.whl;name=lazy_loader;subdir=${S}/lazy_loader\
            https://files.pythonhosted.org/packages/fe/ed/1ce51c70fa3fed5eb332354607052c785a83d43a52ef362c31658a977940/pdm-2.27.0-py3-none-any.whl;name=pdm;subdir=${S}/pdm\
-           http://swubn04.india.englab.ti.com/temp-62D/artifacts_mobilenet_v2_tv-onnx.tar.gz;name=artifacts;subdir=${WORKDIR}\
+           http://swubn04.india.englab.ti.com/temp-62D/artifacts_mobilenet_v2_tv-onnx.tar.gz;name=artifacts\
            "
 
 SRC_URI[flit_core.sha256sum] = "18f63100d6f94385c6ed57a72073443e1a71a4acb4339491615d0f16d6ff01b2"
@@ -115,5 +115,5 @@ do_install() {
 
     # Install artifacts folder to /root
     install -d ${D}/root
-    cp -r ${WORKDIR}/artifacts_mobilenet_v2_tv-onnx ${D}/root/
+    cp -r ${UNPACKDIR}/artifacts_mobilenet_v2_tv-onnx ${D}/root/
 }
