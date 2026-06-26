@@ -17,6 +17,7 @@ SRC_URI = "https://files.pythonhosted.org/packages/69/59/b6fc2188dfc7ea4f936cd12
            https://files.pythonhosted.org/packages/33/90/623f99c55c7d0727a58eb2b7dfb65cb406c561a5c2e9a95b0d6a450c473d/wurlitzer-3.1.1.tar.gz;name=wurlitzer;subdir=${S}/deps\
            https://files.pythonhosted.org/packages/8a/a1/8d812e53a5da1687abb10445275d41a8b13adb781bbf7196ddbcf8d88505/lazy_loader-0.5-py3-none-any.whl;name=lazy_loader;subdir=${S}/lazy_loader\
            https://files.pythonhosted.org/packages/fe/ed/1ce51c70fa3fed5eb332354607052c785a83d43a52ef362c31658a977940/pdm-2.27.0-py3-none-any.whl;name=pdm;subdir=${S}/pdm\
+           http://swubn04.india.englab.ti.com/temp-62D/artifacts_mobilenet_v2_tv-onnx.tar.gz;name=artifacts;subdir=${WORKDIR}\
            "
 
 SRC_URI[flit_core.sha256sum] = "18f63100d6f94385c6ed57a72073443e1a71a4acb4339491615d0f16d6ff01b2"
@@ -29,46 +30,10 @@ SRC_URI[plyfile.sha256sum] = "69eb9bfa85de9396e516e89d5b87abc8640e78b5dddd9df259
 SRC_URI[wurlitzer.sha256sum] = "bfb9144ab9f02487d802b9ff89dbd3fa382d08f73e12db8adc4c2fb00cd39bd9"
 SRC_URI[lazy_loader.sha256sum] = "ab0ea149e9c554d4ffeeb21105ac60bed7f3b4fd69b1d2360a4add51b170b005"
 SRC_URI[pdm.sha256sum] = "2f56c4a8f01809564430fb35e850c0b9f56f45e71f272b35dece4db0d558a3aa"
+SRC_URI[artifacts.sha256sum] = "a2de90ad68fe08ac88e2b0c4a5d0f9dad82b6e96a01ae906121e631c22bf31ab"
 
-# Download artifacts folder using wget
-do_fetch_artifacts() {
-    bbnote "Starting artifacts download to ${WORKDIR}"
 
-    # 1. Clean up previous attempts to prevent nesting
-    rm -rf ${WORKDIR}/artifacts_mobilenet_v2_tv-onnx
-    rm -rf ${WORKDIR}/temp_download
-
-    # 2. Download the directory contents
-    # With --cut-dirs=2, wget will download the contents of artifacts_mobilenet_v2_tv-onnx directly
-    bbnote "Downloading from http://swubn04.india.englab.ti.com/temp-62D/artifacts_mobilenet_v2_tv-onnx/"
-
-    if wget -r -np -nH --cut-dirs=2 -R "index.html*" -P ${WORKDIR}/temp_download \
-           http://swubn04.india.englab.ti.com/temp-62D/artifacts_mobilenet_v2_tv-onnx/ ; then
-        bbnote "Wget completed successfully"
-    else
-        bbfatal "Failed to download artifacts. Check network connectivity and server availability."
-    fi
-
-    # 3. Handle the downloaded content
-    # Check if content was downloaded to temp_download
-    if [ -d "${WORKDIR}/temp_download" ] && [ -n "$(ls -A ${WORKDIR}/temp_download 2>/dev/null)" ]; then
-        # Check if there's already a subdirectory named artifacts_mobilenet_v2_tv-onnx
-        if [ -d "${WORKDIR}/temp_download/artifacts_mobilenet_v2_tv-onnx" ]; then
-            bbnote "Found artifacts subdirectory, moving it"
-            mv ${WORKDIR}/temp_download/artifacts_mobilenet_v2_tv-onnx ${WORKDIR}/artifacts_mobilenet_v2_tv-onnx
-        else
-            # Contents were downloaded directly, rename the temp directory
-            bbnote "Contents downloaded directly, renaming temp_download to artifacts_mobilenet_v2_tv-onnx"
-            mv ${WORKDIR}/temp_download ${WORKDIR}/artifacts_mobilenet_v2_tv-onnx
-        fi
-        bbnote "Artifacts successfully prepared at ${WORKDIR}/artifacts_mobilenet_v2_tv-onnx"
-    else
-        bbfatal "No content was downloaded from the server"
-    fi
-}
-addtask fetch_artifacts after do_unpack before do_patch
-
-DEPENDS += "unzip-native python3-setuptools-native wget-native"
+DEPENDS += "unzip-native python3-setuptools-native"
 
 RDEPENDS:${PN} += " \
      python3-mldtypes \
@@ -116,7 +81,6 @@ inherit python3-dir
 FILES:${PN} += "${PYTHON_SITEPACKAGES_DIR}/*"
 FILES:${PN} += "/root/*"
 
-addtask do_install after do_fetch_artifacts
 
 do_install() {
     install -d ${D}${PYTHON_SITEPACKAGES_DIR}
